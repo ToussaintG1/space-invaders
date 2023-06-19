@@ -22,10 +22,12 @@ export default class EnemyController {
     fireBulletTimerDefault = 100;
     fireBulletTimer = this.fireBulletTimerDefault; 
 
-    constructor(canvas, enemyBulletController) {
+    constructor(canvas, enemyBulletController, playerBulletController) {
         this.canvas = canvas;
         this.enemyBulletController = enemyBulletController;
-        this.playerBulletController = this.playerBulletController;
+        this.playerBulletController = playerBulletController;
+        this.enemyDeathSound = new Audio('./assets/enemy-death.wav');
+        this.enemyDeathSound.volume = .5;
         this.createEnemies();
     }
 
@@ -41,9 +43,11 @@ export default class EnemyController {
     collisionDetection() {
         this.enemyRows.forEach((enemyRow)=> {
             enemyRow.forEach((enemy, enemyIndex)=> {
-                if (this.playerBulletController.collideWith(enemy)){
-                    //play a sound
+                if (this.playerBulletController.collideWith(enemy)) {
+                    this.enemyDeathSound.currentTime = 0;
+                    this.enemyDeathSound.play();
                     enemyRow.splice(enemyIndex, 1);
+
                 }
             });  
         });
@@ -59,7 +63,6 @@ export default class EnemyController {
             const enemyIndex = Math.floor(Math.random() * allEnemies.length);
             const enemy = allEnemies[enemyIndex];
             this.enemyBulletController.shoot(enemy.x, enemy.y, -3);
-            console.log(enemyIndex);
         }
     }
 
@@ -135,6 +138,11 @@ export default class EnemyController {
                 }
             });
         })
+
+    }
+
+    collideWith(sprite) {
+        return this.enemyRows.flat().some(enemy => enemy.collideWith(sprite));
 
     }
 }
